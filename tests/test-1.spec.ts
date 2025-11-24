@@ -11,6 +11,7 @@ interface Elements {
   };
 }
 
+
 const elements: Elements [] = [
   {
     locator : (page: Page) : Locator => 
@@ -93,43 +94,51 @@ const elements: Elements [] = [
       value: '/docs/intro',
     },
   },
+
 ];
+
+const lightModes = ['system', 'light', 'dark'];
 
 test.describe('Тесты для главной страницы playwright.dev', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('https://playwright.dev/');
   });
+
 test('Проверка отображения элементов навигации хедера', async ({ page }) => {
-  elements.forEach(({locator, name}) => {
-    test.step(`Проверка отображения элемента ${name}`, async () => {
-  await expect.soft(locator(page)).toBeVisible();
-  });
-  })
+  for (const {locator, name} of elements) {
+    await test.step(`Проверка отображения элемента ${name}`, async () => {
+      await expect.soft(locator(page)).toBeVisible();
+    });
+  }
 });
 test('Проверка названия элементов навигации хедера', async ({ page }) => {
-  elements.forEach(({locator, name, text}) => {
+  for (const {locator, name, text} of elements) {
     if (text) {
-      test.step(`Проверка названия элемента ${name}`, async () => {
-      await expect.soft(locator(page)).toContainText(text);
-    });
+      await test.step(`Проверка названия элемента ${name}`, async () => {
+        await expect.soft(locator(page)).toContainText(text);
+      });
     }
-  }); 
+  } 
 });
 
-
-test('Проверка атрибутов href элементов навигации хедера', async ({ page }) => {
-  elements.forEach(({locator, name, attribute}) => {
+test('Проверка атрибутов href элементов навигации хедера', async ({ page }) => {  for (const {locator, name, attribute} of elements) {
     if (attribute) {
-      test.step(`Проверка аттрибутов href элемента ${name}`, async () => {
-      await expect.soft(locator(page)).toHaveAttribute(attribute?.type, attribute?.value);
-    });
+      await test.step(`Проверка аттрибутов href элемента ${name}`, async () => {
+        await expect.soft(locator(page)).toHaveAttribute(attribute?.type, attribute?.value);
+      });
     }
-  });
+  }
 });
-
 test('Проверка переключения лайт мода', async ({ page }) => {
   await page.getByRole('button', { name: 'Switch between dark and light' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 });
-
+lightModes.forEach((value) => {
+test(`Проверка cтилей активного ${value} мода`, async ({page}) => {
+    await page.evaluate((value) => {
+    document.querySelector('html')?.setAttribute('data-theme', value);
+  }, value);
+    await expect(page).toHaveScreenshot(`pageWith${value}Mode.png`);
+});
+});
 });
