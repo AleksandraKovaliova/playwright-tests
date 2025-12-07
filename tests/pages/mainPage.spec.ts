@@ -1,5 +1,5 @@
 import { test, expect, Page, Locator } from '@playwright/test';
-import { text } from 'stream/consumers';
+import { } from '../models/MainPage';
 
 interface Elements {
   locator: (page: Page) => Locator;
@@ -10,7 +10,6 @@ interface Elements {
     value: string;
   };
 }
-
 
 const elements: Elements [] = [
   {
@@ -99,35 +98,28 @@ const elements: Elements [] = [
 
 const lightModes = ['system', 'light', 'dark'];
 
+let mainPage : mainPage;
+
 test.describe('Тесты для главной страницы playwright.dev', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('https://playwright.dev/');
+  // await page.goto('https://playwright.dev/');
   });
 
 test('Проверка отображения элементов навигации хедера', async ({ page }) => {
-  for (const {locator, name} of elements) {
-    await test.step(`Проверка отображения элемента ${name}`, async () => {
-      await expect.soft(locator(page)).toBeVisible();
-    });
-  }
+  MainPage = new mainPage (page);
+  await mainPage.openMainPage();
+  await mainPage.checkElementsVisibility();
 });
 test('Проверка названия элементов навигации хедера', async ({ page }) => {
-  for (const {locator, name, text} of elements) {
-    if (text) {
-      await test.step(`Проверка названия элемента ${name}`, async () => {
-        await expect.soft(locator(page)).toContainText(text);
-      });
-    }
-  } 
+  const mainPage = new MainPage (page);
+  await mainPage.openMainPage();
+  await mainPage.checkElementsText();
 });
 
-test('Проверка атрибутов href элементов навигации хедера', async ({ page }) => {  for (const {locator, name, attribute} of elements) {
-    if (attribute) {
-      await test.step(`Проверка аттрибутов href элемента ${name}`, async () => {
-        await expect.soft(locator(page)).toHaveAttribute(attribute?.type, attribute?.value);
-      });
-    }
-  }
+test('Проверка атрибутов href элементов навигации хедера', async ({ page }) => {  
+  const mainPage = new MainPage (page);
+  await mainPage.openMainPage();
+  await mainPage.checkElementsHrefAttribute();
 });
 test('Проверка переключения лайт мода', async ({ page }) => {
   await page.getByRole('button', { name: 'Switch between dark and light' }).click();
